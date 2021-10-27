@@ -1,5 +1,5 @@
  **python_tool_box**
- *Python Math*
- *- Rectangle Program*
+ **Python Math**
+ **- Rectangle Program**
 
 ## Rectangle Program
