@@ -1,3 +1,5 @@
+import math
+
 def c_to_f(c):
     return (c * 9 / 5) + 32
 
@@ -16,7 +18,7 @@ def get_temperature():
 
 def main():
     while True:
-        print("\nTemperature Converter")
+        print("\nTemperature Converter \n-----------------")
         print("C - Celsius to Fahrenheit")
         print("F - Fahrenheit to Celsius")
         print("B - Back to Main Menu")
@@ -32,6 +34,7 @@ def main():
             print(f"{temp}°F = {f_to_c(temp):.2f}°C")
 
         elif choice == "B":
-            return  # Back to Math.py
+            print("Back to Main Script")
+            return # Back to Math.py
         else:
             print("Invalid option.")

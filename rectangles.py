@@ -1,83 +1,109 @@
-import unittest
-
-class Point: # The object to hold the values of the points of the rectangles
-    def __init__(self,x,y,):
+class Point:
+    def __init__(self, x, y):
         self.x = x
         self.y = y
 
 
-def intersection(l1,r1,l2,r2):
-    if(l1.x == r1.x or l1.y == r1.y or l2.x == r2.x or l2.y == r2.y): # Checking if the points are a line and not a rectangle
-        return False
-    if(l1.x >= r2.x or r2.y >= l1.y): # checking if the points are beside the first rectangle
-        return False
-    if(r1.y >= l2.y or r2.y >= l1.y): # checking if the points are above the first rectangle
-        return False
-    return True
+class Rectangle:
+    def __init__(self, p1: Point, p2: Point):
+        # Normalize coordinates
+        self.left = min(p1.x, p2.x)
+        self.right = max(p1.x, p2.x)
+        self.top = max(p1.y, p2.y)
+        self.bottom = min(p1.y, p2.y)
+
+    def is_valid(self):
+        return self.left < self.right and self.bottom < self.top
 
 
-def containment(l1,r1,l2,r2):
-    if(l1.x == r1.x or l1.y == r1.y or l2.x == r2.x or l2.y == r2.y): # Checking if the points are a line and not a rectangle
-        return False
-    if(l1.y < l2.y or r1.x < r2.x): # Checking if the points are outside the first rectangle
-        return False
-    return True
-    
+def intersects(r1: Rectangle, r2: Rectangle) -> bool:
+    return not (
+        r1.right <= r2.left or
+        r1.left >= r2.right or
+        r1.top <= r2.bottom or
+        r1.bottom >= r2.top
+    )
 
 
-def adjacency(l1,r1,l2,r2):
-    if(l1.x == r1.x or l1.y == r1.y or l2.x == r2.x or l2.y == r2.y): # Checking if the points are a line and not a rectangle
-        return False
-    if(r1.x == l2.x or r2.y == l1.y): # Checking if one side is adjacent to the other
-        return True
+def contains(r1: Rectangle, r2: Rectangle) -> bool:
+    return (
+        r1.left <= r2.left and
+        r1.right >= r2.right and
+        r1.top >= r2.top and
+        r1.bottom <= r2.bottom
+    )
 
 
-def main():# Main function
+def adjacent(r1: Rectangle, r2: Rectangle) -> bool:
+    vertical_touch = (
+        r1.right == r2.left or r1.left == r2.right
+    ) and not (
+        r1.top <= r2.bottom or r1.bottom >= r2.top
+    )
 
-    topLeft1 = Point(int(input('Top left 1 X \n')),int(input('Top left 1 Y \n')))
-    bottomRight1 = Point(int(input('bottom Right 1 X \n')),int(input('bottom Right 1 Y \n')))
-    topLeft2 = Point(int(input('Top left 2 X \n')),int(input('Top left 2 Y \n')))
-    bottomRight2 = Point(int(input('bottom Right 2 X \n')),int(input('bottom Right 2 Y \n')))
+    horizontal_touch = (
+        r1.top == r2.bottom or r1.bottom == r2.top
+    ) and not (
+        r1.right <= r2.left or r1.left >= r2.right
+    )
 
-    if (containment(topLeft1,bottomRight1,topLeft2,bottomRight2)): # First check if the points of the second rectangle are within the first retangle
-        print('Rectangle is Contained within the other')
-        print('Not adjacent')
-        print('They do not intersect')
-    else:
-        print('No Containment')
-        if (adjacency(topLeft1,bottomRight1,topLeft2,bottomRight2)): # Next check if the rectangles are adjacent
-            print('They are Adjacent')
-            print('They do not intersect')
+    return vertical_touch or horizontal_touch
+
+
+def main():
+    """
+    Interactive Rectangle Checker.
+    After each check, user can:
+        - Check another rectangle
+        - Go back to main menu
+    """
+    while True:
+        print("\nRectangle Checker\n-----------------")
+        try:
+            r1 = Rectangle(
+                Point(int(input("Rect 1 X1: ")), int(input("Rect 1 Y1: "))),
+                Point(int(input("Rect 1 X2: ")), int(input("Rect 1 Y2: ")))
+            )
+
+            r2 = Rectangle(
+                Point(int(input("Rect 2 X1: ")), int(input("Rect 2 Y1: "))),
+                Point(int(input("Rect 2 X2: ")), int(input("Rect 2 Y2: ")))
+            )
+        except ValueError:
+            print("Invalid input. Please enter numeric values.")
+            continue
+
+        if not r1.is_valid() or not r2.is_valid():
+            print("Invalid rectangle dimensions. Make sure width and height are > 0.")
+            continue
+
+        # Check containment
+        if contains(r1, r2):
+            print("Rectangle 2 is contained within Rectangle 1")
+        elif contains(r2, r1):
+            print("Rectangle 1 is contained within Rectangle 2")
         else:
-            print('Not adjacent')
-            if (intersection(topLeft1,bottomRight1,topLeft2,bottomRight2)): # Finally check if they intersect
-                print('Rectangles intersect')
+            print("No containment detected")
+
+        # Check adjacency
+        if adjacent(r1, r2):
+            print("Rectangles are adjacent")
+        else:
+            print("Not adjacent")
+
+        # Check intersection
+        if intersects(r1, r2):
+            print("Rectangles intersect")
+        else:
+            print("Rectangles do not intersect")
+
+        # Ask user if they want to continue
+        while True:
+            again = input("\nCheck another rectangle? (Y/N) or B to go back: ").strip().upper()
+            if again == "Y":
+                break  # repeat the loop
+            elif again == "B" or again == "N":
+                print("Returning to main menu...")
+                return
             else:
-                print('They do not intersect')
-
-class TestProgram (unittest.TestCase):
-        def test_Containment(self):
-            topLeft1 = Point(0,10)
-            bottomRight1 = Point(10,0)
-            topLeft2 = Point(5,5)
-            bottomRight2 = Point(6,1)
-            self.assertEquals(containment(topLeft1,bottomRight1,topLeft2,bottomRight2),True)
-            
-        def test_adjacent(self): 
-            topLeft1 = Point(0,10)
-            bottomRight1 = Point(10,0)
-            topLeft2 = Point(10,5)
-            bottomRight2 = Point(15,0) 
-            self.assertEquals(adjacency(topLeft1,bottomRight1,topLeft2,bottomRight2),True)
-
-        def test_intersection(self): 
-            topLeft1 = Point(0,10)
-            bottomRight1 = Point(10,0)
-            topLeft2 = Point(10,5)
-            bottomRight2 = Point(15,0) 
-            self.assertEquals(intersection(topLeft1,bottomRight1,topLeft2,bottomRight2),True)
-
-
-if __name__ == '__main__':
-    main()
-    #unittest.main()
+                print("Invalid input. Enter Y, N, or B.")
